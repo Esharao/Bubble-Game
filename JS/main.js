@@ -1,6 +1,10 @@
-var timer = 60;
-var score = 0;
-var hitrn = 0;
+let timer = 60;
+let score = 0;
+let hitrn = 0;
+let highScore = localStorage.getItem("highScore") || 0;
+
+document.querySelector("#scoreval").textContent = score;
+document.querySelector("#timerval").textContent = timer;
 
 function increaseScore() {
     score += 10;
@@ -12,33 +16,40 @@ function getNewHit() {
     document.querySelector("#hitval").textContent = hitrn;
 }
 
-function makebubble() {
-    var clutter = "";
-    for (var i = 1; i <= 60; i++) {
-        var rn = Math.floor(Math.random() * 10);
+function makeBubble() {
+    let clutter = "";
+    for (let i = 1; i <= 60; i++) {
+        let rn = Math.floor(Math.random() * 10);
         clutter += `<div class="bubble">${rn}</div>`;
     }
     document.querySelector("#pbtm").innerHTML = clutter;
 }
 
-function runtime() {
-    var timerint = setInterval(function () {
+function startTimer() {
+    let timerInterval = setInterval(() => {
         if (timer > 0) {
             timer--;
             document.querySelector("#timerval").textContent = timer;
         } else {
-            clearInterval(timerint);
-            showAlert();  // Call the function to show the alert when the timer hits 0
+            clearInterval(timerInterval);
+            checkHighScore();
+            showAlert();
         }
     }, 1000);
 }
 
+function checkHighScore() {
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+        alert(`🎉 New High Score: ${highScore}!`);
+    }
+}
+
 function showAlert() {
-    var playAgain = confirm("Time's up! Do you want to replay?");
+    let playAgain = confirm(`Time's up! Your score: ${score}\nHigh Score: ${highScore}\nDo you want to replay?`);
     if (playAgain) {
         resetGame();
-    } else {
-        alert("Your final score is: " + score);
     }
 }
 
@@ -48,20 +59,22 @@ function resetGame() {
     document.querySelector("#scoreval").textContent = score;
     document.querySelector("#timerval").textContent = timer;
     getNewHit();
-    makebubble();
-    runtime();
+    makeBubble();
+    startTimer();
 }
 
-document.querySelector("#pbtm").addEventListener("click", function (dets) {
-    var clickednum = Number(dets.target.textContent);
-    if (timer > 0 && clickednum === hitrn) {
-        increaseScore();
-        makebubble();
-        getNewHit();
+document.querySelector("#pbtm").addEventListener("click", (event) => {
+    if (event.target.classList.contains("bubble")) {
+        let clickedNum = Number(event.target.textContent);
+        if (timer > 0 && clickedNum === hitrn) {
+            increaseScore();
+            makeBubble();
+            getNewHit();
+        }
     }
 });
 
-// Initial function calls
-runtime();
-makebubble();
+// Initialize Game
+startTimer();
+makeBubble();
 getNewHit();
